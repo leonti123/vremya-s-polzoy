@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://vremya-s-polzoy.ru/sitemap.xml
