@@ -140,10 +140,12 @@
   .seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .seg button{border:2px solid var(--line);background:none;border-radius:14px;padding:10px;font-size:13.5px;cursor:pointer;line-height:1.3;text-align:left}
   .seg button b{display:block}
+  .seg .wide{grid-column:1/-1}
   .seg button.on{border-color:var(--teal);background:var(--sky-pale)}
   .res{background:var(--teal);color:#fff;border-radius:18px;padding:20px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center}
   .res b{font-family:Lora,Georgia,serif;font-variant-numeric:lining-nums;font-size:26px;line-height:1.2;display:block}
-  .res small{color:#cdeaee;font-size:13px}
+  .res small{color:#cdeaee;font-size:13px;display:block}
+  .res small:empty{display:none}
   .res .btn{background:#fff;color:var(--teal);border-color:#fff;padding:11px 18px;font-size:14px}
   .hint{background:#fff2ea;border-radius:12px;padding:10px 14px;font-size:13.5px;line-height:1.45}
   .hint[hidden]{display:none}
@@ -437,11 +439,19 @@
           <button data-k="3000"><b>3D-торты</b>от 3 000 ₽/кг</button>
         </div>
       </div>
+      <div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:8px">Как получить</div>
+        <div class="seg" id="delivery">
+          <button data-fee="0" data-how="Самовывоз" class="on"><b>Самовывоз</b>бесплатно</button>
+          <button data-fee="300" data-how="Доставка по Невскому району"><b>По Невскому району</b>300 ₽</button>
+          <button data-fee="0" data-how="Доставка в другой район" class="wide"><b>В другой район</b>по стоимости Яндекс Такси</button>
+        </div>
+      </div>
       <div class="res">
-        <div><small>примерный вес и цена</small><b><span id="r-w"></span>, от <span id="r-p"></span></b><small>предоплата 30%: <span id="r-pp"></span></small></div>
+        <div><small>примерный вес и цена</small><b><span id="r-w"></span>, от <span id="r-p"></span></b><small id="r-del"></small><small>предоплата 30% за торт: <span id="r-pp"></span></small></div>
         <button class="btn" id="to-order">Заказать</button>
       </div>
-      <p class="note">Считаем примерно по 150 г на человека, минимальный вес 1 кг. За некоторые начинки и топперы есть доплата, доставка считается отдельно.</p>
+      <p class="note">Считаем примерно по 150 г на человека, минимальный вес 1 кг. За некоторые начинки и топперы есть доплата.</p>
     </div>
   </div>
 </section>
@@ -700,10 +710,11 @@
   // Weight calculator: about 150 g per guest, 1 kg minimum, rounded up to 0.5 kg
   const guests = $("guests");
   function calc(){
-    const g = +guests.value, w = Math.max(1, Math.ceil(g * .15 * 2) / 2), k = +document.querySelector("#decor .on").dataset.k, p = w * k;
+    const g = +guests.value, w = Math.max(1, Math.ceil(g * .15 * 2) / 2), k = +document.querySelector("#decor .on").dataset.k, p = w * k, d = document.querySelector("#delivery .on");
     $("g-val").textContent = g;
     $("r-w").textContent = w.toLocaleString("ru-RU") + " кг";
-    $("r-p").textContent = rub(p);
+    $("r-p").textContent = rub(p + +d.dataset.fee);
+    $("r-del").textContent = d.dataset.how === "Самовывоз" ? "" : +d.dataset.fee ? "с доставкой 300 ₽" : "без доставки, она по Яндекс Такси";
     $("r-pp").textContent = rub(Math.round(p * .3 / 10) * 10);
     $("hint").hidden = g > 3;
   }
@@ -717,7 +728,12 @@
   // Order form: the lead goes to VK through Apps Script, the group chat is the fallback
   $("f-cake").innerHTML = "<option>По моей идее</option>" + CAKES.map(c => `<option>${c[0]}</option>`).join("");
   $("f-fill").innerHTML = "<option>Посоветуйте</option>" + FILLS.map(f => `<option>${f[0]}</option>`).join("");
+  $("delivery").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    document.querySelectorAll("#delivery button").forEach(x => x.classList.toggle("on", x === b)); calc();
+  });
   $("to-order").onclick = () => {
+    form.how.value = document.querySelector("#delivery .on").dataset.how;
     form.guests.value = guests.value;
     form.comment.value = `По калькулятору: ${$("r-w").textContent}, от ${$("r-p").textContent}`;
     $("order").scrollIntoView();
