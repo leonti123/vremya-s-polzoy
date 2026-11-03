@@ -313,6 +313,21 @@
     .hero h1{font-size:26px}
   }
 </style>
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript">
+    (function(m,e,t,r,i,k,a){
+        m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+        m[i].l=1*new Date();
+        for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+        k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+    })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=114052852', 'ym');
+
+    ym(114052852, 'init', {ssr:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
+    // Goals for Metrica: "lead" = form sent, "contact" = click on phone or a messenger
+    window.goal = function(n){ try { ym(114052852, 'reachGoal', n); } catch (e) {} };
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/114052852" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
 </head>
 <body>
 
@@ -782,7 +797,7 @@
       ok = (await res.json()).ok === true;
     } catch (e) {}
     submitBtn.disabled = false; submitBtn.textContent = "Отправить заявку";
-    if (ok) { submitBtn.hidden = true; sentBox.hidden = false; }
+    if (ok) { submitBtn.hidden = true; sentBox.hidden = false; goal("lead"); }
     else fallbackBox.hidden = false;
   });
   $("send-vk").onclick = () => {
@@ -802,6 +817,8 @@
   $("menu").addEventListener("click", e => { if (e.target.tagName === "A") $("menu").classList.remove("open"); });
   const io = new IntersectionObserver(es => es.forEach(x => { if (x.isIntersecting) { x.target.classList.add("in"); io.unobserve(x.target); } }), {threshold: .12});
   document.querySelectorAll(".reveal").forEach(el => io.observe(el));
+  // Metrica goal: clicks on the phone and messenger links
+  document.addEventListener("click", e => { if (e.target.closest('a[href^="tel:"], a[href*="wa.me"], a[href*="t.me"], a[href*="max.ru"], a[href*="vk.me"]')) goal("contact"); });
 </script>
 </body>
 </html>
